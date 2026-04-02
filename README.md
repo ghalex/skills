@@ -26,6 +26,7 @@ npx skills add ghalex/skills -g
 | Skill | Description |
 |---|---|
 | [`fastapi-setup`](#fastapi-setup) | Scaffold a production-ready FastAPI project |
+| [`fastapi-architect`](#fastapi-architect) | Audit any FastAPI project against architecture rules |
 
 ---
 
@@ -44,6 +45,23 @@ Scaffolds a complete FastAPI project with clean layered architecture, auth, Dock
 **Install:**
 ```bash
 npx skills add ghalex/skills --skill fastapi-setup
+```
+
+---
+
+## `fastapi-architect`
+
+Audits any FastAPI project against a clean layered architecture — routes, services, models, agents, db access patterns.
+
+**Trigger phrases:**
+- "review my routes"
+- "check architecture"
+- "audit this project"
+- "does this follow the fastapi rules"
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill fastapi-architect
 ```
 
 ---
