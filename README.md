@@ -36,15 +36,15 @@ Scaffolds a complete FastAPI project with clean layered architecture, auth, Dock
 
 **Includes:** SQLAlchemy 2.x · JWT auth · Pydantic v2 · services layer · agents dir · justfile · Dockerfile · CLAUDE.md
 
-**Trigger phrases:**
-- "create a new FastAPI project"
-- "scaffold a fastapi app"
-- "new fastapi project"
-- "setup a fastapi api"
-
 **Install:**
 ```bash
 npx skills add ghalex/skills --skill fastapi-setup
+```
+
+**Usage:**
+```bash
+claude "create a new FastAPI project in dir myapi"
+claude "scaffold a fastapi app called myapi"
 ```
 
 ---
@@ -53,15 +53,16 @@ npx skills add ghalex/skills --skill fastapi-setup
 
 Audits any FastAPI project against a clean layered architecture — routes, services, models, agents, db access patterns.
 
-**Trigger phrases:**
-- "review my routes"
-- "check architecture"
-- "audit this project"
-- "does this follow the fastapi rules"
-
 **Install:**
 ```bash
 npx skills add ghalex/skills --skill fastapi-architect
+```
+
+**Usage:**
+```bash
+claude "review my routes"
+claude "audit this project"
+claude "does this follow the fastapi rules"
 ```
 
 ---
