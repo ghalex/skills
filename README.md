@@ -27,6 +27,8 @@ npx skills add ghalex/skills -g
 |---|---|
 | [`fastapi-setup`](#fastapi-setup) | Scaffold a production-ready FastAPI project |
 | [`fastapi-architect`](#fastapi-architect) | Audit any FastAPI project against architecture rules |
+| [`react-setup`](#react-setup) | Scaffold a production-ready React 19 + Vite SPA |
+| [`commit`](#commit) | Create well-structured git commits with conventional format |
 
 ---
 
@@ -63,6 +65,42 @@ npx skills add ghalex/skills --skill fastapi-architect
 claude "review my routes"
 claude "audit this project"
 claude "does this follow the fastapi rules"
+```
+
+---
+
+## `react-setup`
+
+Scaffolds a complete React SPA with auth, routing, and state management ready to go.
+
+**Includes:** React 19 · Vite 7 · TypeScript · Tailwind CSS v4 · shadcn/ui (new-york) · Redux Toolkit + RTK Query · React Router v7 · PrivateRoute/PublicRoute · JWT auth with localStorage · Dockerfile + nginx · CLAUDE.md
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill react-setup
+```
+
+**Usage:**
+```bash
+claude "create a new React project called myapp"
+claude "scaffold a react spa called dashboard"
+claude "new react frontend"
+```
+
+---
+
+## `commit`
+
+Groups changed files into logical commits, asks for confirmation, then creates them sequentially using conventional commit format.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill commit
+```
+
+**Usage:**
+```
+/commit
 ```
 
 ---
