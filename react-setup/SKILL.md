@@ -23,7 +23,7 @@ rm -rf src/assets
 ### 2. Create directory structure
 
 ```bash
-mkdir -p src/pages src/lib src/hooks src/store/auth src/components/auth src/components/ui
+mkdir -p src/pages src/lib src/hooks src/store/auth src/components/auth src/components/ui src/components/layout
 ```
 
 ### 3. Install dependencies
@@ -38,7 +38,7 @@ pnpm add -D @types/node tw-animate-css shadcn
 Run from inside the project directory:
 
 ```bash
-cd {project} && pnpm dlx shadcn@latest add button field input card
+cd {project} && pnpm dlx shadcn@latest add button field input card sidebar breadcrumb collapsible dropdown-menu avatar
 ```
 
 ### 5. Write all files below
@@ -320,6 +320,9 @@ export interface SignupData {
 export default {
   appName: (import.meta.env.VITE_APP_NAME as string) || '{project}',
   apiUrl: (import.meta.env.VITE_API_URL as string) || '/api',
+  tokenKey: (import.meta.env.VITE_TOKEN_KEY as string) || 'app-token',
+  userKey: (import.meta.env.VITE_USER_KEY as string) || 'app-user',
+  isProd: import.meta.env.PROD,
 }
 ```
 
@@ -331,16 +334,14 @@ import { twMerge } from 'tailwind-merge'
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-
-export function getApiEndpoint(): string {
-  return (import.meta.env.VITE_API_URL as string) || '/api'
-}
 ```
 
 ### `src/lib/token.ts`
 ```ts
-const TOKEN_KEY = 'app-token'
-const USER_KEY = 'app-user'
+import config from '@/config'
+
+const TOKEN_KEY = config.tokenKey
+const USER_KEY = config.userKey
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY)
 export const setToken = (token: string) => localStorage.setItem(TOKEN_KEY, token)
@@ -477,13 +478,13 @@ import type { User, LoginData, SignupData } from '@/types'
 import { setCurrentUser, clearCurrentUser } from './slice'
 import { createBaseQueryWithReauth } from '@/lib/api'
 import { setToken, setUserData, clearAuthData } from '@/lib/token'
-import { getApiEndpoint } from '@/lib/utils'
+import config from '@/config'
 
 interface AuthResponse { access_token: string; user: User }
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: createBaseQueryWithReauth(getApiEndpoint()),
+  baseQuery: createBaseQueryWithReauth(config.apiUrl),
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, LoginData>({
       query: (body) => ({ url: '/auth/login', method: 'POST', body }),
@@ -686,22 +687,339 @@ export { default as PublicRoute } from './public-route'
 export { LoginForm } from './login-form'
 ```
 
-### `src/pages/home.tsx`
+### `src/hooks/use-mobile.ts`
+```ts
+import { useEffect, useState } from 'react'
+
+const MOBILE_BREAKPOINT = 768
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined)
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    mql.addEventListener('change', onChange)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+
+  return !!isMobile
+}
+```
+
+### `src/components/layout/nav-main.tsx`
 ```tsx
+import { ChevronRight, type LucideIcon } from 'lucide-react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from '@/components/ui/sidebar'
+
+interface NavItem {
+  title: string
+  url: string
+  icon: LucideIcon
+  isActive?: boolean
+  items?: { title: string; url: string }[]
+}
+
+export function NavMain({ items }: { items: NavItem[] }) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarMenu>
+        {items.map((item) => (
+          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={item.title}>
+                <a href={item.url}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </a>
+              </SidebarMenuButton>
+              {item.items?.length ? (
+                <>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuAction className="data-[state=open]:rotate-90">
+                      <ChevronRight />
+                      <span className="sr-only">Toggle</span>
+                    </SidebarMenuAction>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <a href={subItem.url}><span>{subItem.title}</span></a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </>
+              ) : null}
+            </SidebarMenuItem>
+          </Collapsible>
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  )
+}
+```
+
+### `src/components/layout/nav-user.tsx`
+```tsx
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { useAppSelector } from '@/store/hooks'
 import { selectCurrentUser, useLogoutMutation } from '@/store/auth'
 
-export default function Home() {
+export function NavUser() {
+  const { isMobile } = useSidebar()
   const user = useAppSelector(selectCurrentUser)
   const [logout] = useLogoutMutation()
 
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase()
+    : user?.email?.[0].toUpperCase() ?? '?'
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-2">
-      <h1 className="text-2xl font-bold">Hello, {user?.name || user?.email}</h1>
-      <button onClick={() => logout()} className="text-sm text-muted-foreground underline">
-        Logout
-      </button>
-    </div>
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src="" alt={user?.name ?? ''} />
+                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user?.name ?? user?.email}</span>
+                <span className="truncate text-xs">{user?.email}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            side={isMobile ? 'bottom' : 'right'}
+            align="end"
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarImage src="" alt={user?.name ?? ''} />
+                  <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">{user?.name ?? user?.email}</span>
+                  <span className="truncate text-xs">{user?.email}</span>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <Sparkles />
+                Upgrade to Pro
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <BadgeCheck />
+                Account
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <CreditCard />
+                Billing
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Bell />
+                Notifications
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => logout()}>
+              <LogOut />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  )
+}
+```
+
+### `src/components/layout/app-sidebar.tsx`
+```tsx
+import { BookOpen, Bot, Command, Settings2, SquareTerminal } from 'lucide-react'
+import { NavMain } from './nav-main'
+import { NavUser } from './nav-user'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar'
+import config from '@/config'
+
+const navItems = [
+  {
+    title: 'Playground',
+    url: '#',
+    icon: SquareTerminal,
+    isActive: true,
+    items: [
+      { title: 'History', url: '#' },
+      { title: 'Starred', url: '#' },
+      { title: 'Settings', url: '#' },
+    ],
+  },
+  {
+    title: 'Models',
+    url: '#',
+    icon: Bot,
+    items: [
+      { title: 'Genesis', url: '#' },
+      { title: 'Explorer', url: '#' },
+      { title: 'Quantum', url: '#' },
+    ],
+  },
+  {
+    title: 'Documentation',
+    url: '#',
+    icon: BookOpen,
+    items: [
+      { title: 'Introduction', url: '#' },
+      { title: 'Get Started', url: '#' },
+      { title: 'Tutorials', url: '#' },
+      { title: 'Changelog', url: '#' },
+    ],
+  },
+  {
+    title: 'Settings',
+    url: '#',
+    icon: Settings2,
+    items: [
+      { title: 'General', url: '#' },
+      { title: 'Team', url: '#' },
+      { title: 'Billing', url: '#' },
+      { title: 'Limits', url: '#' },
+    ],
+  },
+]
+
+export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  return (
+    <Sidebar variant="inset" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Command className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">{config.appName}</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={navItems} />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
+    </Sidebar>
+  )
+}
+```
+
+### `src/components/layout/index.ts`
+```ts
+export { AppSidebar } from './app-sidebar'
+export { NavMain } from './nav-main'
+export { NavUser } from './nav-user'
+```
+
+### `src/pages/home.tsx`
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import { Separator } from '@/components/ui/separator'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/layout'
+
+export default function Home() {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Overview</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+          </div>
+          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
 ```
@@ -712,7 +1030,7 @@ import { LoginForm } from '@/components/auth'
 
 export default function Login() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
       <LoginForm className="w-full max-w-sm" />
     </div>
   )
@@ -723,6 +1041,8 @@ export default function Login() {
 ```
 VITE_APP_NAME={project}
 VITE_API_URL=http://localhost:8000
+VITE_TOKEN_KEY=app-token
+VITE_USER_KEY=app-user
 ```
 
 ### `CLAUDE.md`
