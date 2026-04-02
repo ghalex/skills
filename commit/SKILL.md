@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Use this skill when the user asks to commit code, create a commit, or save changes to git. Examples: "commit my changes", "create a commit", "let's commit", "commit using the commit skill".
+description: "Use this skill when the user asks to commit code, create a commit, or save changes to git"
 version: 1.0.0
 ---
 
