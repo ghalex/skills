@@ -13,7 +13,7 @@ Ask the user for the **project name** if not provided. Use it as `{project}` thr
 ### 1. Scaffold and clean up
 
 ```bash
-pnpm create vite {project} -- --template react-ts
+pnpm create vite {project} --template react-ts
 cd {project}
 pnpm install
 rm src/App.tsx src/App.css src/index.css
@@ -29,11 +29,19 @@ mkdir -p src/pages src/lib src/hooks src/store/auth src/components/auth src/comp
 ### 3. Install dependencies
 
 ```bash
-pnpm add @reduxjs/toolkit react-redux react-router sonner clsx tailwind-merge tailwindcss @tailwindcss/vite
+pnpm add @reduxjs/toolkit react-redux react-router sonner clsx tailwind-merge tailwindcss @tailwindcss/vite class-variance-authority radix-ui
 pnpm add -D @types/node tw-animate-css shadcn
 ```
 
-### 4. Write all files below
+### 4. Add shadcn components
+
+Run from inside the project directory:
+
+```bash
+cd {project} && pnpm dlx shadcn@latest add button field input card
+```
+
+### 5. Write all files below
 
 ---
 
@@ -519,7 +527,7 @@ export { default as authReducer, setCurrentUser, clearCurrentUser, restoreFromSt
 export { authApi, useLoginMutation, useSignupMutation, useLogoutMutation } from './api'
 ```
 
-### `src/components/auth/PrivateRoute.tsx`
+### `src/components/auth/private-route.tsx`
 ```tsx
 import { Navigate, useLocation } from 'react-router'
 import { useAppSelector } from '@/store/hooks'
@@ -540,7 +548,7 @@ export default function PrivateRoute({ children }: { children: React.ReactNode }
 }
 ```
 
-### `src/components/auth/PublicRoute.tsx`
+### `src/components/auth/public-route.tsx`
 ```tsx
 import { Navigate, useLocation } from 'react-router'
 import { useAppSelector } from '@/store/hooks'
@@ -555,10 +563,127 @@ export default function PublicRoute({ children }: { children: React.ReactNode })
 }
 ```
 
+### `src/components/auth/login-form.tsx`
+```tsx
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+import { useLoginMutation } from "@/store/auth"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [login, { isLoading, isError }] = useLoginMutation()
+
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardDescription>
+            Login with your Apple or Google account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={(e) => { e.preventDefault(); login({ email, password }) }}>
+            <FieldGroup>
+              <Field>
+                <Button variant="outline" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                      d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  Login with Apple
+                </Button>
+                <Button variant="outline" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  Login with Google
+                </Button>
+              </Field>
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+                Or continue with
+              </FieldSeparator>
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Field>
+              <Field>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <a
+                    href="#"
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </Field>
+              <Field>
+                {isError && <p className="text-sm text-destructive">Invalid credentials.</p>}
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Signing in..." : "Login"}
+                </Button>
+                <FieldDescription className="text-center">
+                  Don&apos;t have an account? <a href="#">Sign up</a>
+                </FieldDescription>
+              </Field>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
+      <FieldDescription className="px-6 text-center">
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        and <a href="#">Privacy Policy</a>.
+      </FieldDescription>
+    </div>
+  )
+}
+```
+
 ### `src/components/auth/index.ts`
 ```ts
-export { default as PrivateRoute } from './PrivateRoute'
-export { default as PublicRoute } from './PublicRoute'
+export { default as PrivateRoute } from './private-route'
+export { default as PublicRoute } from './public-route'
+export { LoginForm } from './login-form'
 ```
 
 ### `src/pages/home.tsx`
@@ -583,39 +708,12 @@ export default function Home() {
 
 ### `src/pages/login.tsx`
 ```tsx
-import { useState } from 'react'
-import { useLoginMutation } from '@/store/auth'
+import { LoginForm } from '@/components/auth'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [login, { isLoading, isError }] = useLoginMutation()
-
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <form
-        onSubmit={(e) => { e.preventDefault(); login({ email, password }) }}
-        className="flex w-full max-w-sm flex-col gap-4 p-8"
-      >
-        <h1 className="text-xl font-bold">Sign in</h1>
-        <input
-          type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email" required
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
-        <input
-          type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password" required
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
-        {isError && <p className="text-sm text-destructive">Invalid credentials.</p>}
-        <button
-          type="submit" disabled={isLoading}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-        >
-          {isLoading ? 'Signing in...' : 'Sign in'}
-        </button>
-      </form>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <LoginForm className="w-full max-w-sm" />
     </div>
   )
 }
@@ -641,11 +739,32 @@ React 19 + Vite + TypeScript + Tailwind CSS v4 + shadcn/ui + Redux Toolkit + Rea
 - `src/components/auth/` — PrivateRoute / PublicRoute guards
 - `src/components/ui/` — shadcn components (do not edit manually)
 
+## Component placement rules
+- Feature-specific component → `src/components/{feature}/` (e.g. `logs/`, `alerts/`, `sources/`)
+- Cross-cutting utility component → `src/components/common/`
+- Missing shadcn primitive → `cd {project} && pnpm dlx shadcn@latest add <component>` (installs into `ui/`)
+- **All filenames use kebab-case** — no exceptions: `my-component.tsx`, `private-route.tsx`, `login-form.tsx`
+- Each feature folder has an `index.ts` barrel — always export from it
+
 ## Rules
 - Use `useAppDispatch` / `useAppSelector` — never plain hooks
 - Server data → RTK Query (`api.ts`), client state → Redux slice (`slice.ts`)
 - All protected routes use `<PrivateRoute>`, public routes use `<PublicRoute>`
 - Path alias `@` → `src/`
+- **Forms:** always use `FieldGroup`, `FieldLabel`, `FieldDescription` from `@/components/ui/field` — never use `Label` directly in forms
+
+## Implementation Checklist
+- All imports use `@/` path aliases
+- Use `cn()` utility for className merging (from `@/lib/utils.ts`)
+- **CRITICAL:** Use Field components for forms, NOT Label
+- Proper TypeScript types for all props
+- Use CSS variables: `hsl(var(--primary))`, `hsl(var(--background))`, etc.
+- Follow Tailwind spacing conventions (`p-4`, `gap-2`, etc.)
+- Implement loading states for async operations
+- Handle error states gracefully
+- Make responsive using Tailwind breakpoints (`sm:`, `md:`, `lg:`)
+- Extract complex logic to custom hooks
+- Add utility functions to `src/lib/utils.ts`, not inline
 
 ## Adding a domain
 1. Types → `src/types.ts`
@@ -665,9 +784,9 @@ pnpm dev
 # → http://localhost:5173
 ```
 
-Add shadcn components as needed:
+Add more shadcn components as needed (run from inside the project directory):
 ```bash
-pnpm dlx shadcn@latest add button card input label
+cd {project} && pnpm dlx shadcn@latest add <component>
 ```
 
 Auth expects from your backend:
