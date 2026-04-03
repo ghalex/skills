@@ -26,8 +26,10 @@ npx skills add ghalex/skills -g
 | Skill | Description |
 |---|---|
 | [`fastapi-setup`](#fastapi-setup) | Scaffold a production-ready FastAPI project |
+| [`fastapi-monorepo-setup`](#fastapi-monorepo-setup) | Scaffold a production-ready FastAPI monorepo with uv workspaces |
 | [`fastapi-architect`](#fastapi-architect) | Audit any FastAPI project against architecture rules |
 | [`react-setup`](#react-setup) | Scaffold a production-ready React 19 + Vite SPA |
+| [`react-architect`](#react-architect) | Audit any React SPA project against architecture rules |
 | [`commit`](#commit) | Create well-structured git commits with conventional format |
 
 ---
@@ -85,6 +87,44 @@ npx skills add ghalex/skills --skill react-setup
 claude "create a new React project called myapp"
 claude "scaffold a react spa called dashboard"
 claude "new react frontend"
+```
+
+---
+
+## `fastapi-monorepo-setup`
+
+Scaffolds a complete FastAPI monorepo using `uv` workspaces with 5 shared packages, JWT auth, SQLAlchemy, and Docker support.
+
+**Includes:** uv workspaces · shared packages (config, db, models, utils, services) · JWT auth · SQLAlchemy 2.x · Pydantic v2 · Docker + docker-compose · CLAUDE.md
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill fastapi-monorepo-setup
+```
+
+**Usage:**
+```bash
+claude "create a new fastapi monorepo called myapp"
+claude "scaffold a fastapi monorepo project"
+claude "add a new app to a fastapi monorepo"
+```
+
+---
+
+## `react-architect`
+
+Audits any React SPA project against a clean component architecture — pages, store, components, lib, and routing patterns.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill react-architect
+```
+
+**Usage:**
+```bash
+claude "review my components"
+claude "audit this react project"
+claude "does this follow react rules"
 ```
 
 ---
