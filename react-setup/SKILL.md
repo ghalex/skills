@@ -23,7 +23,7 @@ rm -rf src/assets
 ### 2. Create directory structure
 
 ```bash
-mkdir -p src/pages src/lib src/hooks src/store/auth src/components/auth src/components/ui src/components/layout
+mkdir -p src/pages src/lib src/hooks src/store/auth src/components/auth src/components/ui src/components/layout src/components/common
 ```
 
 ### 3. Install dependencies
@@ -38,7 +38,7 @@ pnpm add -D @types/node tw-animate-css shadcn
 Run from inside the project directory:
 
 ```bash
-cd {project} && pnpm dlx shadcn@latest add button field input card sidebar breadcrumb collapsible dropdown-menu avatar
+cd {project} && pnpm dlx shadcn@latest add button field input card sidebar breadcrumb collapsible dropdown-menu avatar separator
 ```
 
 ### 5. Write all files below
@@ -1046,93 +1046,46 @@ VITE_USER_KEY=app-user
 ```
 
 ### `CLAUDE.md`
+
+> Do **not** restate the architecture rules here. The single source of truth is the `react-rules` skill — duplicating its rules causes drift. CLAUDE.md only points at it.
+
 ```markdown
 # CLAUDE.md
 
-## 1. Stack
-React 19 + Vite + TypeScript + Tailwind CSS v4 + shadcn/ui + Redux Toolkit + React Router
+## Stack
+React 19 + Vite + TypeScript + Tailwind CSS v4 + shadcn/ui + Redux Toolkit + React Router · pnpm · path alias `@` → `src/`
 
-## 2. Structure
-- `src/pages/` — one file per route
-- `src/store/{domain}/` — `slice.ts` + `api.ts` + `index.ts` per domain
-- `src/lib/` — shared utilities (api, token, utils)
-- `src/components/auth/` — PrivateRoute / PublicRoute guards
-- `src/components/ui/` — shadcn components (do not edit manually)
-- `src/components/{feature}/` — feature-specific components (e.g. `agents/`, `logs/`, `alerts/`)
-- `src/components/common/` — cross-cutting utility components
-- **All filenames use kebab-case** — no exceptions: `my-component.tsx`, `private-route.tsx`, `login-form.tsx`
-- Each feature folder has an `index.ts` barrel — always export from it
-- Missing shadcn primitive → `pnpm dlx shadcn@latest add <component>` (installs into `ui/`)
-- Path alias `@` → `src/` — all imports use `@/` paths
+## Architecture rules — load `react-rules`
 
-## 3. Component
-- **One component per file** — never define multiple components in a single file. If a page needs sub-components (tabs, sections, dialogs, helper blocks), extract each into its own file under `src/components/{feature}/` and import it. Trivial one-liner wrappers used only once (e.g. a styled `<div>`) may stay inline.
-- Proper TypeScript types for all props
-- Use `cn()` for className merging (from `@/lib/utils.ts`)
-- **Forms:** always use `FieldGroup`, `FieldLabel`, `FieldDescription` from `@/components/ui/field` — never use `Label` directly in forms
-- Extract complex logic to custom hooks
-- Add utility functions to `src/lib/utils.ts`, not inline
-- Use `React.memo` for expensive components
-- Implement proper `key` props for lists
-- Lazy load heavy components when appropriate
-- Minimize re-renders through proper state management
+The **`react-rules`** skill is the authoritative source for all architecture rules: stack, structure, naming, components, body ordering, store, and design style.
 
-### Body ordering
-Every component must follow this order — no interleaving:
-1. **Declarations** — all `const` together: hooks (`useParams`, `useState`, `useAppSelector`, RTK Query), then derived values computed from them
-2. **Effects** — `useEffect` and other side-effect hooks
-3. **Render helpers** — `const renderXxx = () => <JSX />` arrow functions for distinct sections
-4. **Compose** — `const renderMain = () => { ... }` handles loading/error/empty branching
-5. **Return** — `return renderMain()` or compose with render helpers; no early returns, no nested ternaries
+- **Always load the `react-rules` skill before any React work** — adding a page, component, or store domain; implementing a feature; or reviewing code.
+- Do not rely on rules being copied into this file — read them from `react-rules` so updates to the skill take effect automatically.
 
-```tsx
-// ✅ Correct
-// 1. declarations
-const { id } = useParams()
-const { data, isLoading, error } = useGetItemQuery(id)
-const isEmpty = !data?.length
+## Design
 
-// 2. effects
-useEffect(() => { ... }, [])
+This project follows `DESIGN.md` at the repo root. **Read `DESIGN.md` before building or changing any UI** and match its tokens, colors, radius, typography, and component patterns. Keep `DESIGN.md` and `src/main.css` in sync when rebranding.
 
-// 3. render helpers
-const renderLoading = () => <LoadingSpinner />
-const renderError = () => <ErrorMessage error={error} />
-const renderContent = () => <MainContent data={data} />
-
-// 4. compose
-const renderMain = () => {
-  if (isLoading) return renderLoading()
-  if (error) return renderError()
-  if (isEmpty) return null
-  return renderContent()
-}
-
-// 5. return
-return <div>{renderMain()}</div>
-```
-
-## 4. Store
-- Use `useAppDispatch` / `useAppSelector` — never plain hooks
-- Server data → RTK Query (`api.ts`), client state → Redux slice (`slice.ts`)
-- All protected routes use `<PrivateRoute>`, public routes use `<PublicRoute>`
-
-### Adding a domain
-1. Types → `src/types.ts`
-2. `src/store/{domain}/slice.ts` → `api.ts` → `index.ts`
-3. Register in `src/store/index.ts`
-4. Page → `src/pages/{domain}.tsx`
-5. Route → `src/routes.tsx`
-
-## 5. Skills
+## Skills
 
 Use these slash commands before starting related work:
 
+- `/react-rules` — load before any React development or review (source of truth)
 - `/shadcn` — when adding, composing, or debugging shadcn/ui components
 - `/frontend-design` — when building new pages, components, or polishing UI
 - `/react-architect` — when reviewing component structure or auditing architecture
 - `/simplify` — after finishing code changes, to review for reuse and quality
 ```
+
+---
+
+### 6. Apply the design system (`DESIGN.md`)
+
+Every project must have a `DESIGN.md` at its root (required by `react-rules` § Design Style).
+
+- **Load the `react-rules` skill** and copy its bundled default `DESIGN.md` to the project root (`{project}/DESIGN.md`).
+- The bundled default documents the neutral shadcn/OKLCH theme that this scaffold's `src/main.css` already implements — so the project and its `DESIGN.md` agree out of the box.
+- Tell the user a default design system has been applied, and that they can rebrand by editing the tokens in `src/main.css` and the matching rows in `DESIGN.md` together.
 
 ---
 
