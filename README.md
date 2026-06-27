@@ -35,6 +35,7 @@ npx skills add ghalex/skills -g
 | [`commit`](#commit) | Create well-structured git commits with conventional format |
 | [`grill-me`](#grill-me) | Stress-test a plan or design by being interviewed relentlessly |
 | [`handoff`](#handoff) | Compact the current conversation into a handoff document |
+| [`create-a-prd`](#create-a-prd) | Turn a feature idea into a self-contained, durable PRD |
 
 ---
 
@@ -216,6 +217,24 @@ npx skills add ghalex/skills --skill handoff
 **Usage:**
 ```
 /handoff
+```
+
+---
+
+## `create-a-prd`
+
+Turns a feature idea into a self-contained, durable Product Requirements Document. Interviews you about the problem and solution, verifies your assertions against the codebase, sketches the deep modules to build, then files the PRD as local Markdown at `prds/prd-<feature-name>.md`. The PRD avoids file paths and code snippets so it doesn't go stale as the code moves.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill create-a-prd
+```
+
+**Usage:**
+```bash
+claude "write a PRD for adding a new payment method"
+claude "formalize this feature idea into a PRD"
+claude "I need product requirements for the export feature"
 ```
 
 ---
