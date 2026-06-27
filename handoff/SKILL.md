@@ -6,6 +6,8 @@ disable-model-invocation: true
 version: 1.0.0
 ---
 
+# /handoff
+
 Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS - not the current workspace.
 
 Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
