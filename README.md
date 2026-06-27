@@ -36,6 +36,7 @@ npx skills add ghalex/skills -g
 | [`grill-me`](#grill-me) | Stress-test a plan or design by being interviewed relentlessly |
 | [`handoff`](#handoff) | Compact the current conversation into a handoff document |
 | [`create-a-prd`](#create-a-prd) | Turn a feature idea into a self-contained, durable PRD |
+| [`prd-to-issues`](#prd-to-issues) | Break a PRD or plan into vertically-sliced issues for a ralph loop |
 
 ---
 
@@ -235,6 +236,24 @@ npx skills add ghalex/skills --skill create-a-prd
 claude "write a PRD for adding a new payment method"
 claude "formalize this feature idea into a PRD"
 claude "I need product requirements for the export feature"
+```
+
+---
+
+## `prd-to-issues`
+
+Breaks a PRD or plan into independently-grabbable, vertically-sliced Markdown issues — concrete work orders an agent can implement one-by-one in a **ralph loop**. Each slice is a tracer bullet through all layers end-to-end, sized to a single iteration, typed `afk` or `human`, and numbered topologically. Completion is tracked by file location (`issues/` → `issues/done/`) rather than a status field, so the loop never has to parse state.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill prd-to-issues
+```
+
+**Usage:**
+```bash
+claude "turn this PRD into issues"
+claude "slice prds/prd-export.md into issues for a loop"
+claude "break this plan into tickets I can hand to an agent"
 ```
 
 ---
