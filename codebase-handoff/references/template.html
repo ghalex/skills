@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{REPO_NAME}} — Handoff</title>
+<style>
+  :root{
+    --bg:#fafbfc; --surface:#ffffff; --ink:#2b2f36; --muted:#6b7280;
+    --line:#e7e9ee; --accent:#7c8aa5; --accent-soft:#eef1f6;
+    --ok:#3f7d58; --warn:#9a7b3f; --miss:#9a5b5b;
+    --radius:10px; --maxw:980px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55}
+  header{max-width:var(--maxw);margin:0 auto;padding:40px 24px 8px}
+  header h1{margin:0 0 4px;font-size:26px;font-weight:600;letter-spacing:-.01em}
+  header .sub{color:var(--muted);font-size:14px}
+  nav{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+  nav .tabs{max-width:var(--maxw);margin:0 auto;display:flex;gap:4px;flex-wrap:wrap;padding:8px 24px}
+  nav button[role=tab]{appearance:none;border:0;background:transparent;color:var(--muted);
+    padding:8px 14px;font-size:14px;border-radius:999px;cursor:pointer}
+  nav button[role=tab]:hover{color:var(--ink);background:var(--accent-soft)}
+  nav button[role=tab].active{color:var(--ink);background:var(--accent-soft);font-weight:600}
+  main{max-width:var(--maxw);margin:0 auto;padding:24px}
+  section[role=tabpanel]{display:none;animation:fade .15s ease}
+  section[role=tabpanel].active{display:block}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  h2{font-size:20px;font-weight:600;margin:8px 0 16px}
+  h3{font-size:15px;font-weight:600;margin:24px 0 8px;color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;margin:0 0 16px}
+  .field{display:grid;grid-template-columns:200px 1fr;gap:12px;padding:6px 0;
+    border-bottom:1px solid var(--line);font-size:14px}
+  .field:last-child{border-bottom:0}
+  .field-label{color:var(--muted)}
+  .field-value{color:var(--ink)}
+  .badge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;
+    border:1px solid var(--line);vertical-align:middle}
+  .badge.detected{color:var(--ok);background:#f1f7f3;border-color:#d7e7dd}
+  .badge.inferred{color:var(--warn);background:#f8f4ec;border-color:#ece0c9}
+  .badge.missing{color:var(--miss);background:#f8efef;border-color:#ecd6d6}
+  .evidence{margin-top:14px;font-size:12px;color:var(--muted);border-top:1px dashed var(--line);
+    padding-top:10px}
+  .evidence b{color:var(--ink);font-weight:600}
+  code{background:var(--accent-soft);padding:1px 5px;border-radius:5px;font-size:.9em}
+  pre.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin:0 0 16px;text-align:center;overflow-x:auto}
+  pre.mermaid svg{max-width:100%;height:auto}
+  /* Architecture diagram only: subtle "flowing" edges + hover lift on nodes. */
+  pre.mermaid.arch svg .edgePaths path,
+  pre.mermaid.arch svg .flowchart-link{stroke-dasharray:6 5;animation:dashflow 1.1s linear infinite}
+  @keyframes dashflow{to{stroke-dashoffset:-22}}
+  pre.mermaid.arch svg .node{transition:filter .15s ease}
+  pre.mermaid.arch svg .node:hover{filter:drop-shadow(0 3px 7px rgba(43,47,54,.16))}
+  @media (prefers-reduced-motion:reduce){
+    pre.mermaid.arch svg .edgePaths path,
+    pre.mermaid.arch svg .flowchart-link{animation:none}}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:0 0 16px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600}
+  footer{max-width:var(--maxw);margin:0 auto;padding:24px;color:var(--muted);font-size:12px}
+  /* Collapsible API resource groups (native <details>) */
+  details.api-group{border:1px solid var(--line);border-radius:var(--radius);margin:0 0 8px;background:var(--surface);overflow:hidden}
+  details.api-group>summary{cursor:pointer;padding:10px 14px;font-size:14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+  details.api-group>summary::-webkit-details-marker{display:none}
+  details.api-group>summary::before{content:"▸";color:var(--muted);font-size:12px;transition:transform .15s ease}
+  details.api-group[open]>summary::before{transform:rotate(90deg)}
+  details.api-group>summary:hover{background:var(--accent-soft)}
+  details.api-group[open]>summary{border-bottom:1px solid var(--line)}
+  details.api-group .count{margin-left:auto;font-size:11px;font-weight:500;color:var(--muted);background:var(--accent-soft);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+  details.api-group table{margin:0}
+  details.api-group td,details.api-group th{padding:8px 14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>{{REPO_NAME}}</h1>
+  <div class="sub">Architecture &amp; handoff documentation · generated {{GENERATED_DATE}}</div>
+</header>
+
+<nav>
+  <div class="tabs" role="tablist">
+    <button role="tab" class="active" aria-selected="true" aria-controls="tab-overview">Overview</button>
+    <button role="tab" aria-selected="false" aria-controls="tab-architecture">Architecture</button>
+    <button role="tab" aria-selected="false" aria-controls="tab-deployment">Deployment</button>
+    <button role="tab" aria-selected="false" aria-controls="tab-database">Database</button>
+    <button role="tab" aria-selected="false" aria-controls="tab-api">API</button>
+    <button role="tab" aria-selected="false" aria-controls="tab-local">Local Dev</button>
+  </div>
+</nav>
+
+<main>
+  <section role="tabpanel" id="tab-overview" class="active" aria-label="Overview">
+    {{TAB_OVERVIEW_BODY}}
+  </section>
+  <section role="tabpanel" id="tab-architecture" aria-label="Architecture">
+    {{TAB_ARCHITECTURE_BODY}}
+  </section>
+  <section role="tabpanel" id="tab-deployment" aria-label="Deployment">
+    {{TAB_DEPLOYMENT_BODY}}
+  </section>
+  <section role="tabpanel" id="tab-database" aria-label="Database">
+    {{TAB_DATABASE_BODY}}
+  </section>
+  <section role="tabpanel" id="tab-api" aria-label="API">
+    {{TAB_API_BODY}}
+  </section>
+  <section role="tabpanel" id="tab-local" aria-label="Local Development">
+    {{TAB_LOCAL_BODY}}
+  </section>
+</main>
+
+<footer>Generated from repo-detectable facts. Sections marked
+  <span class="badge inferred">inferred</span> or
+  <span class="badge missing">not detected</span> were not directly confirmed in source.</footer>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  // securityLevel 'loose' + htmlLabels lets architecture nodes embed <img> brand logos.
+  // fontFamily is set EXPLICITLY (not 'inherit') so Mermaid measures label widths with the
+  // same font it renders — 'inherit' causes mis-measured, clipped node text.
+  mermaid.initialize({
+    startOnLoad:false, theme:'base', securityLevel:'loose',
+    flowchart:{ htmlLabels:true, useMaxWidth:true, nodeSpacing:55, rankSpacing:65, padding:12, wrappingWidth:200 },
+    er:{ useMaxWidth:true, entityPadding:14, minEntityWidth:140 },
+    themeVariables:{
+      primaryColor:'#eef1f6', primaryTextColor:'#2b2f36', primaryBorderColor:'#c3ccda',
+      lineColor:'#9aa7bd', secondaryColor:'#f3f4f6', tertiaryColor:'#fafbfc',
+      fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif', fontSize:'14px'
+    }
+  });
+  const tabs = [...document.querySelectorAll('[role=tab]')];
+  const panels = [...document.querySelectorAll('[role=tabpanel]')];
+  async function renderIn(panel){
+    const nodes = [...panel.querySelectorAll('.mermaid:not([data-processed])')];
+    if(nodes.length){ try{ await mermaid.run({nodes}); }catch(e){ console.error(e); } }
+  }
+  function activate(id){
+    tabs.forEach(t=>{const on=t.getAttribute('aria-controls')===id;
+      t.classList.toggle('active',on); t.setAttribute('aria-selected',String(on));});
+    panels.forEach(p=>{const on=p.id===id; p.classList.toggle('active',on); if(on) renderIn(p);});
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>activate(t.getAttribute('aria-controls'))));
+  activate('tab-overview');
+</script>
+</body>
+</html>
