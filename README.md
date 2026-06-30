@@ -34,6 +34,7 @@ npx skills add ghalex/skills -g
 | [`react-rules`](#react-rules) | Definitive React architecture rules for auditing and development |
 | [`commit`](#commit) | Create well-structured git commits with conventional format |
 | [`grill-me`](#grill-me) | Stress-test a plan or design by being interviewed relentlessly |
+| [`grill-me-technical`](#grill-me-technical) | Stress-test a feature's full vertical slice (DB→UI), grounded in the code |
 | [`handoff`](#handoff) | Compact the current conversation into a handoff document |
 | [`create-a-prd`](#create-a-prd) | Turn a feature idea into a self-contained, durable PRD |
 | [`prd-to-issues`](#prd-to-issues) | Break a PRD or plan into vertically-sliced issues for a ralph loop |
@@ -202,6 +203,23 @@ npx skills add ghalex/skills --skill grill-me
 ```bash
 claude "grill me on this plan"
 claude "stress-test this design before I build it"
+```
+
+---
+
+## `grill-me-technical`
+
+Interviews you relentlessly about the full technical architecture of a feature, one layer at a time, walking the vertical slice **bottom-up from the database to the UI** and grounding every question in the actual code. Loads `fastapi-rules` and `react-rules` for authoritative layer rules and path maps, reads what exists at each layer before asking, recommends an answer, and names the downstream ripple of each decision. The conversation is the output — no spec file.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill grill-me-technical
+```
+
+**Usage:**
+```bash
+claude "grill me technically on this feature"
+claude "stress-test this feature's architecture from db to ui"
 ```
 
 ---
