@@ -32,6 +32,8 @@ npx skills add ghalex/skills -g
 | [`react-setup`](#react-setup) | Scaffold a production-ready React 19 + Vite SPA |
 | [`react-architect`](#react-architect) | Audit any React SPA project against architecture rules |
 | [`react-rules`](#react-rules) | Definitive React architecture rules for auditing and development |
+| [`nextjs-architect`](#nextjs-architect) | Audit any Next.js App Router project against architecture rules |
+| [`nextjs-rules`](#nextjs-rules) | Definitive Next.js App Router architecture rules for auditing and development |
 | [`commit`](#commit) | Create well-structured git commits with conventional format |
 | [`grill-me`](#grill-me) | Stress-test a plan or design by being interviewed relentlessly |
 | [`grill-me-technical`](#grill-me-technical) | Stress-test a feature's full vertical slice (DB→UI), grounded in the code |
@@ -170,6 +172,43 @@ claude "add a new page"
 claude "add a new store domain"
 claude "implement this feature"
 claude "review my frontend structure"
+```
+
+---
+
+## `nextjs-architect`
+
+Audits any Next.js App Router project against the rules — the server/client boundary, data access, route handlers, middleware, auth, caching, and metadata. The rules themselves live in [`nextjs-rules`](#nextjs-rules); this skill loads them and adds the review process, severity ranking, and report format.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill nextjs-architect
+```
+
+**Usage:**
+```bash
+claude "review this next app"
+claude "audit this nextjs project"
+claude "does this follow nextjs rules"
+```
+
+---
+
+## `nextjs-rules`
+
+The definitive source for Next.js App Router architecture rules — used by both the architect (auditing) and during development (adding routes, server actions, components, features). Server Components by default with Server Actions for mutations; route handlers reserved for webhooks and external consumers; `httpOnly` cookie sessions; explicit caching intent per segment; metadata on every page.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill nextjs-rules
+```
+
+**Usage:**
+```bash
+claude "add a new route"
+claude "add a server action"
+claude "implement this feature"
+claude "review my app router structure"
 ```
 
 ---
