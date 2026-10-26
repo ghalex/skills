@@ -41,6 +41,7 @@ npx skills add ghalex/skills -g
 | [`create-a-prd`](#create-a-prd) | Turn a feature idea into a self-contained, durable PRD |
 | [`prd-to-issues`](#prd-to-issues) | Break a PRD or plan into vertically-sliced issues for a ralph loop |
 | [`vm-security`](#vm-security) | Audit and harden a Linux VM over SSH, and check it for signs of compromise |
+| [`pr-review`](#pr-review) | Review a GitHub PR in rounds that converge, with the review's memory kept on the PR |
 
 ---
 
@@ -329,6 +330,24 @@ npx skills add ghalex/skills --skill vm-security
 ```bash
 claude "secure my server 1.2.3.4, admin user alice, key ~/.ssh/my-server-key"
 claude "check 1.2.3.4 for anything suspicious, log in as alice with ~/.ssh/my-server-key"
+```
+
+---
+
+## `pr-review`
+
+Reviews a GitHub pull request the way an experienced reviewer does: one deep review first (parallel reviewers per area, every major verified by a separate agent and backed by a concrete failure scenario), then later rounds check only whether findings were addressed and what the new commits changed. The memory, meaning findings and their status, lives in one summary comment on the PR, so settled findings are never raised again and the rounds end. It never approves on GitHub.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill pr-review
+```
+
+**Usage:**
+```
+/pr-review 42
+/pr-review 42 --dry-run
+claude "re-review PR 42, check my fixes"
 ```
 
 ---
