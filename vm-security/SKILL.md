@@ -16,17 +16,26 @@ needs to be copied to the server.
 
 ## Inputs to collect
 
-Never assume these. Ask the user for whatever is not in the request or in
-your notes about their servers, in one question:
+**Required, from the user only.** The host IP, the admin username and the SSH
+key must be given by the user. Never take them from memory or notes, `~/.ssh/config`,
+the files in `~/.ssh`, or an earlier session, and never guess. These choose which
+machine gets locked down and who keeps access, so a wrong value can lock someone
+out of a server. If any of the three is missing from the request, ask for all the
+missing ones in one question, and don't connect until you have them:
 
 - **Host IP** (and SSH port if not 22).
-- **Admin user** — the one account that will be allowed to SSH in. Any name;
+- **Admin username**: the one account that will be allowed to SSH in. Any name;
   it is created if it doesn't exist, with no password and NOPASSWD sudo (key
   is the only way in). An existing user is left as is, including password sudo
   — then the user has to run the scripts themselves (see step 1).
-- **How to log in today** — which user (root or an existing one) and which
-  SSH key (`-i ~/.ssh/<key> -o IdentitiesOnly=yes`).
-- **Known IPs** of the user (optional) — passed as
+- **SSH key**: the path to the private key to connect with
+  (`-i <key> -o IdentitiesOnly=yes`), and which user it logs in as today (root
+  or an existing user). The new admin user gets the keys already authorized for
+  root.
+
+Optional, ask once together with the above:
+
+- **Known IPs** of the user, passed as
   `--known-ips a,b,prefix.` so logins from elsewhere get flagged. The IP of
   whoever is connected during the audit is trusted automatically.
 
