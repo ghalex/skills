@@ -11,7 +11,7 @@ npx skills add ghalex/skills --skill vm-security
 ## Usage
 
 ```
-claude "secure my server 1.2.3.4, admin user ghalex"
+claude "secure my server 1.2.3.4, admin user alice"
 claude "check 1.2.3.4 for anything suspicious"
 ```
 
@@ -29,7 +29,7 @@ Both scripts can be used on their own, piped over SSH:
 
 ```bash
 ssh HOST 'sudo bash -s -- --known-ips 1.2.3.4,5.6.7.' < scripts/audit.sh
-ssh HOST 'sudo bash -s -- --admin ghalex --webhook https://hooks.slack.com/...' < scripts/harden.sh
+ssh HOST 'sudo bash -s -- --admin alice --webhook https://hooks.slack.com/...' < scripts/harden.sh
 ```
 
 **harden.sh** (idempotent; `--only` / `--skip` steps)

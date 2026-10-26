@@ -327,7 +327,7 @@ npx skills add ghalex/skills --skill vm-security
 
 **Usage:**
 ```bash
-claude "secure my server 1.2.3.4, admin user ghalex"
+claude "secure my server 1.2.3.4, admin user alice"
 claude "check 1.2.3.4 for anything suspicious"
 ```
 

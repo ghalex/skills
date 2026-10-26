@@ -2,7 +2,7 @@
 # vm-security / harden.sh — idempotent hardening for Ubuntu/Debian VMs.
 #
 # Run as root on the target, e.g. from your laptop:
-#   ssh HOST 'sudo bash -s -- --admin ghalex' < harden.sh
+#   ssh HOST 'sudo bash -s -- --admin alice' < harden.sh
 #
 # Steps (all on by default, pick with --only / --skip):
 #   admin     create the admin user from root's authorized_keys if missing

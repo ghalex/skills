@@ -16,17 +16,27 @@ needs to be copied to the server.
 
 ## Inputs to collect
 
-- **Host IP**, and the **admin user** (ask; default the user's usual name).
-- **SSH key** to use (`-i ~/.ssh/<key> -o IdentitiesOnly=yes`).
-- **Known IPs** of the user — memory may have them. Passed as
+Never assume these. Ask the user for whatever is not in the request or in
+your notes about their servers, in one question:
+
+- **Host IP** (and SSH port if not 22).
+- **Admin user** — the one account that will be allowed to SSH in. Any name;
+  it is created if it doesn't exist, with no password and NOPASSWD sudo (key
+  is the only way in). An existing user is left as is, including password sudo
+  — then the user has to run the scripts themselves (see step 1).
+- **How to log in today** — which user (root or an existing one) and which
+  SSH key (`-i ~/.ssh/<key> -o IdentitiesOnly=yes`).
+- **Known IPs** of the user (optional) — passed as
   `--known-ips a,b,prefix.` so logins from elsewhere get flagged. The IP of
   whoever is connected during the audit is trusted automatically.
-- Before hardening, ask only what changes the outcome:
-  - other accounts that must keep SSH (deploy users, a Dokploy/CI that logs in
-    as root) → `--extra-users`; if something needs **root** SSH, stop and discuss.
-  - SSH tunnels needed (DB access over `ssh -L`)? → `--keep-tcp-forwarding`
-  - extra public ports beyond 22/80/443 → `--allow-ports`
-  - a Slack/Discord webhook for login alerts → `--webhook`
+
+Before hardening, also ask only what changes the outcome:
+
+- other accounts that must keep SSH (deploy users, a Dokploy/CI that logs in
+  as root) → `--extra-users`; if something needs **root** SSH, stop and discuss.
+- SSH tunnels needed (DB access over `ssh -L`)? → `--keep-tcp-forwarding`
+- extra public ports beyond 22/80/443 → `--allow-ports`
+- a Slack/Discord webhook for login alerts → `--webhook`
 
 ## Procedure
 

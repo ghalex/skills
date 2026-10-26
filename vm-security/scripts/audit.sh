@@ -3,7 +3,7 @@
 # It changes nothing on the machine (only a temp file, removed on exit).
 #
 # Run as root on the target, e.g. from your laptop:
-#   ssh HOST 'sudo bash -s -- --known-ips 79.119.231.60,188.25.59.' < audit.sh
+#   ssh HOST 'sudo bash -s -- --known-ips 203.0.113.7,198.51.100.' < audit.sh
 #
 # Options:
 #   --known-ips a,b   your IPs or prefixes; logins from anything else are flagged
