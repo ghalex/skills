@@ -40,6 +40,7 @@ npx skills add ghalex/skills -g
 | [`handoff`](#handoff) | Compact the current conversation into a handoff document |
 | [`create-a-prd`](#create-a-prd) | Turn a feature idea into a self-contained, durable PRD |
 | [`prd-to-issues`](#prd-to-issues) | Break a PRD or plan into vertically-sliced issues for a ralph loop |
+| [`vm-security`](#vm-security) | Audit and harden a Linux VM over SSH, and check it for signs of compromise |
 
 ---
 
@@ -311,6 +312,23 @@ npx skills add ghalex/skills --skill prd-to-issues
 claude "turn this PRD into issues"
 claude "slice prds/prd-export.md into issues for a loop"
 claude "break this plan into tickets I can hand to an agent"
+```
+
+---
+
+## `vm-security`
+
+Audits a Linux VM read-only (logins, root sessions, unknown IPs, persistence, odd processes, modified files), then hardens it: key-only SSH as one admin user, fail2ban, ufw, unattended upgrades, sysctl, journald cap, optional login alerts.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill vm-security
+```
+
+**Usage:**
+```bash
+claude "secure my server 1.2.3.4, admin user ghalex"
+claude "check 1.2.3.4 for anything suspicious"
 ```
 
 ---
