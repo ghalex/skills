@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Review a GitHub pull request in rounds that converge — one deep, verified review first, then later rounds check only the fixes and the new commits, with the review's memory (findings and their status) kept in one comment on the PR. Use when the user says "review PR 42", "review this pull request", "re-review the PR", "check if my review comments were addressed", "/pr-review", or passes a PR number or URL to review.
+description: Review a GitHub pull request in rounds that converge — one deep, verified review first, then later rounds check only the fixes and the new commits, with the review's memory (findings and their status) kept in one comment on the PR. Use when the user says "review PR 42", "do a PR review on 42", "do a pr on X", "review this pull request", "re-review the PR", "check if my review comments were addressed", "review and fix PR 42", "/pr-review", or passes a PR number or URL to review. It posts without asking: the finished product is the inline comments and the round summary on the PR.
 ---
 
 # PR Review
@@ -14,6 +14,7 @@ didn't break anything.**
 ```
 round 1   full diff → reviewers in parallel → verify each major → post
 round 2+  read memory → status of old findings → review only new commits → verify → post
+--fix     after posting: fix each open finding → tests → one commit each → push → next round
 stop      no open major and the last round found no new major → ready for a human to merge
 ```
 
@@ -23,15 +24,23 @@ Each finding is also an inline comment, so the author answers it where it is.
 
 ## Arguments
 
-`/pr-review <number|url> [--full] [--dry-run] [--yes]`
+`/pr-review <number|url> [--full] [--dry-run] [--fix [F1,F3]]`
 
 - `--full`: review the whole diff again, but keep the memory (settled findings stay settled).
-- `--dry-run`: show the findings, post nothing, write no state.
-- `--yes`: post without asking (CI). Without it, always show the findings and ask before posting.
+- `--dry-run`: print the findings in the terminal and post nothing. The
+  prepared files stay in the scratchpad; when the user then says "post" (or
+  "post all but F3"), post those files as they are, without reviewing again.
+- `--fix`: after posting, fix the open findings on the PR branch, one commit
+  each, push, and run the next round to confirm (see **--fix**). With ids,
+  fix only those. Not with `--dry-run`.
+
+Run it start to finish without asking anything. The finished product is the
+inline comments and the round summary on the PR, then a short recap in the
+terminal. The only question allowed is which PR, and only if it can't be found.
 
 No number: use the PR of the current branch (`gh pr view --json number`). No PR
-at all: say the memory needs a PR, and offer a one-off review of `git diff main...HEAD`
-that follows the round-1 bar and posts nothing.
+at all: review `git diff main...HEAD` once with the round-1 bar and print the
+findings in the terminal; there is nowhere to post.
 
 ## What counts
 
@@ -96,7 +105,7 @@ the existing findings passed in as *known*.
    stays major, `downgrade` becomes minor, `rejected` is dropped. Minors are not
    verified, but read each one yourself and drop what you can't stand behind.
 6. **Number** findings `F1, F2, …` continuing from the highest id in the state.
-7. **Show and post** (below).
+7. **Post** (below).
 
 ### Round 2+: only what changed
 
@@ -118,20 +127,24 @@ the existing findings passed in as *known*.
    per-area reviewers for a large one, each told the known findings so nothing
    is re-reported. Look at what the fixes changed *and* what they call.
    Verify new majors the same way.
-4. **Show and post.**
+4. **Post.**
 
-### Show and post
+### Post
 
-Show the user a table: id, severity, `file:line`, one-line claim, and for round
-2+ the status changes. Then, unless `--dry-run`:
+Post without asking. With `--dry-run`: write the same files, print the table
+below plus each finding's full comment body, and stop. If the user then says
+"post", run the same steps on those files; drop any finding they struck, and
+renumber nothing.
 
-- **Ask before posting** (posting to a PR is public), unless `--yes`.
-- **New findings** → one review with inline comments. Write `review.json` in
-  the scratchpad and run `$S review N review.json`. Each comment body:
+- **New findings** → one review with inline comments, one comment per finding
+  on the file and line it is about. Write `review.json` in the scratchpad and
+  run `$S review N review.json`. Its `body` is one line:
+  `PR review, round 1 (3e4dc62): 4 majors, 14 minors, inline below. Summary and state in the pr-review comment.`
+  Each comment body:
   ```
   **major** · F3 — <one-line claim>
 
-  **Failure:** <inputs/state → outcome>
+  **Failure:** <inputs/state → outcome; say so when you reproduced it, and how>
   **Fix:** <short suggestion, if obvious>
 
   <!-- pr-review:F3 -->
@@ -140,6 +153,8 @@ Show the user a table: id, severity, `file:line`, one-line claim, and for round
   line goes on the nearest changed line it relates to, or only in the summary.
 - **Summary + state** → write `summary.md` and `state.json`, then
   `$S write N summary.md state.json`. It edits the same comment every round.
+- **Recap** in the terminal: the summary table (id, severity, `file:line`,
+  claim, status) and the links to the review and the summary comment. Nothing else.
 
 Summary layout:
 
@@ -154,6 +169,8 @@ Summary layout:
 | F2 | minor | `ui/list.tsx:9` | 🚫 wontfix | ... |
 
 **Noticed outside this PR:** <one line each, or omit>
+
+Checked and consistent: <what you verified and found fine: contracts, versions, tests run; one paragraph, or omit>
 
 <sub>Resolve a thread when it's fixed. Reply `wontfix: <reason>` or
 `disagree: <reason>` to close it without a change. Next round reviews only new commits.</sub>
@@ -177,6 +194,44 @@ State (`state.json`, full list every time, never drop a finding):
 `status` is one of `open`, `fixed`, `wontfix`, `disputed`. Match old findings
 to code by `file` + `claim`, not by line; lines move.
 
+### --fix: fix, commit, push, confirm
+
+Only after the round is posted, so every finding has its id and its thread.
+
+1. **Where.** The fixes go on the PR's head branch. The checkout (or the
+   scratchpad worktree) must be at `headRefOid` with a clean tree; with
+   uncommitted changes, stop and say so, never stash or reset. If the head
+   branch is in a fork the current user cannot push to, fix and commit in the
+   worktree anyway, don't push, and say where the commits are.
+2. **Which.** Every finding with status `open`, majors first, then minors, in
+   id order; or only the ids given. Never `wontfix`, `disputed` or `fixed`.
+   Skip a finding whose fix needs a decision the author must make (a changed
+   contract, a product choice) and say why in the recap.
+3. **How.** One finding at a time, never in parallel: fixes share files.
+   Read the finding's thread first; a reply may constrain the fix. Make the
+   smallest change that removes the failure scenario, in the project's style
+   and under its written rules. When the finding asked for a test, or the
+   path had none, add one that fails before the fix and passes after.
+4. **Tests.** Run the project's test command (from its rules, `package.json`,
+   `justfile`, `Makefile`, CI config) after each fix. A failure you caused:
+   fix it or drop the change. A suite that already failed before you touched
+   anything: say so once, and judge each fix by the tests it touches.
+5. **Commit.** One commit per finding, on a green suite, conventional format:
+   `fix(<scope>): <claim in a few words> (F3)`, body: the failure scenario in
+   one line and what changed. Two findings fixed by one change share a commit
+   that names both ids. Never amend, never force-push.
+6. **Push** to the head branch, then run **Round 2+** as usual: it marks the
+   fixed findings `fixed`, reviews the delta, and posts. For each finding it
+   confirmed fixed, reply `fixed in <short sha>` in its thread
+   (`$S reply N <comment_id> body.md`) and resolve the thread
+   (`$S resolve N <thread_id>`); ids come from `$S threads N`.
+7. **Loop.** If the confirming round found new majors, fix those the same way.
+   The round cap applies: the fix loop ends with the rounds, and whatever is
+   still open is reported, not fixed.
+
+The recap lists each commit with its finding, the findings skipped and why,
+and the push result.
+
 ## Stop rule
 
 - **Ready**: no `open` major, and this round found no new major. Say "ready for
@@ -191,6 +246,9 @@ to code by `file` + `claim`, not by line; lines move.
 - Every major has a failure scenario and a verifier's `confirmed`. No exceptions.
 - Never re-report a finding that is in the state, whatever its status.
 - After round 1, never review code outside the delta, except to read context.
-- Don't post, edit or resolve anything on GitHub other than through `state.sh`,
-  and only after the user agreed (or `--yes`).
+- Don't post, edit or resolve anything on GitHub other than through `state.sh`.
+- Don't ask the user anything during a run; decide and go. `--dry-run` is how
+  they look first.
+- With `--fix`: never commit on a dirty tree, never commit with the tests red,
+  never amend or force-push, and never touch a finding that isn't `open`.
 - Only the summary comment written by the current `gh` user is read as state.

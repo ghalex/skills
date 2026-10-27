@@ -15,10 +15,15 @@ Needs `gh` (logged in) and `jq`.
 
 ```
 /pr-review 42             first run: deep review; later runs: only the new commits
-/pr-review 42 --dry-run   show findings, post nothing
+/pr-review 42 --dry-run   print the findings, post nothing; say "post" afterwards to post them as shown
 /pr-review 42 --full      review everything again, keeping settled findings settled
-/pr-review 42 --yes       post without asking (CI)
+/pr-review 42 --fix       review, post, then fix each open finding (one commit each), push, and re-review
+/pr-review 42 --fix F1,F3 same, for those findings only
 ```
+
+It runs start to finish without asking anything. The finished product is one
+inline comment per finding, on the file and line it is about, plus the round
+summary comment on the PR.
 
 ## How it works
 
@@ -34,6 +39,11 @@ Needs `gh` (logged in) and `jq`.
    Settled findings are never raised again.
 5. **It has a stop rule.** "Ready" means no open major and no new major this
    round. After 3 rounds it hands over to a human. It never approves on GitHub.
+6. **`--fix` closes the loop.** After posting, it fixes each open finding on
+   the PR branch, one commit per finding on a green test suite, pushes, and
+   runs the next round to confirm. Confirmed fixes get a `fixed in <sha>`
+   reply and their thread resolved. It never force-pushes or commits on a
+   dirty tree.
 
 Authors resolve a thread when it's fixed, or reply `wontfix: <reason>` /
 `disagree: <reason>`.
@@ -46,5 +56,7 @@ Authors resolve a thread when it's fixed, or reply `wontfix: <reason>` /
 scripts/state.sh read 42                        # the state JSON
 scripts/state.sh threads 42                     # finding threads: resolved, replies
 scripts/state.sh review 42 review.json          # post inline findings
+scripts/state.sh reply 42 <comment_id> body.md  # reply in a finding's thread
+scripts/state.sh resolve 42 <thread_id>         # resolve a finding's thread
 scripts/state.sh write 42 summary.md state.json # create or update the summary comment
 ```

@@ -347,6 +347,7 @@ npx skills add ghalex/skills --skill pr-review
 ```
 /pr-review 42
 /pr-review 42 --dry-run
+/pr-review 42 --fix
 claude "re-review PR 42, check my fixes"
 ```
 

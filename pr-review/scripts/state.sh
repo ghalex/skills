@@ -11,8 +11,10 @@
 #
 # Usage (run inside a clone of the PR's repo; needs gh and jq):
 #   state.sh read    <pr>                       print the state JSON (round 0 if none yet)
-#   state.sh threads <pr>                       print [{id, resolved, outdated, replies:[{author, body}]}]
+#   state.sh threads <pr>                       print [{id, thread_id, comment_id, resolved, outdated, replies:[{author, body}]}]
 #   state.sh review  <pr> <review.json>         post inline findings: {"body": "...", "comments": [{path, line, body}]}
+#   state.sh reply   <pr> <comment_id> <body.md>  reply in a finding's thread (comment_id from `threads`)
+#   state.sh resolve <pr> <thread_id>           resolve a finding's thread (thread_id from `threads`)
 #   state.sh write   <pr> <summary.md> <state.json>   create or update the summary comment
 set -euo pipefail
 
@@ -22,7 +24,7 @@ die() { echo "state.sh: $*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null || die "$1 is required"; }
 need gh; need jq
 
-[ $# -ge 2 ] || { sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+[ $# -ge 2 ] || { sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 CMD=$1; PR=${2##*/}   # accepts a number or a PR URL
 [[ $PR =~ ^[0-9]+$ ]] || die "not a PR number: $2"
 
@@ -54,8 +56,8 @@ case "$CMD" in
           pullRequest(number: $pr) {
             reviewThreads(first: 100) {
               nodes {
-                isResolved isOutdated
-                comments(first: 30) { nodes { author { login } body } }
+                id isResolved isOutdated
+                comments(first: 30) { nodes { databaseId author { login } body } }
               }
             }
           }
@@ -64,8 +66,9 @@ case "$CMD" in
       [.data.repository.pullRequest.reviewThreads.nodes[]
        | (.comments.nodes[0].body | capture("<!-- pr-review:(?<id>F[0-9]+) -->")?) as $m
        | select($m != null)
-       | {id: $m.id, resolved: .isResolved, outdated: .isOutdated,
-          replies: [.comments.nodes[1:][] | {author: .author.login, body}]}]'
+       | {id: $m.id, thread_id: .id, comment_id: .comments.nodes[0].databaseId,
+          resolved: .isResolved, outdated: .isOutdated,
+          replies: [.comments.nodes[1:][] | {author: (.author.login // "ghost"), body}]}]'
     ;;
 
   review)
@@ -85,6 +88,20 @@ case "$CMD" in
     fi
     ;;
 
+  reply)
+    [ $# -eq 4 ] || die "usage: state.sh reply <pr> <comment_id> <body.md>"
+    [[ $3 =~ ^[0-9]+$ ]] || die "not a comment id: $3 (use comment_id from \`threads\`)"
+    jq -n --rawfile b "$4" '{body: $b}' |
+      gh api "repos/$REPO/pulls/$PR/comments/$3/replies" --input - --jq .html_url
+    ;;
+
+  resolve)
+    [ $# -eq 3 ] || die "usage: state.sh resolve <pr> <thread_id>"
+    gh api graphql -f id="$3" -f query='
+      mutation($id: ID!) { resolveReviewThread(input: {threadId: $id}) { thread { isResolved } } }' \
+      --jq '.data.resolveReviewThread.thread.isResolved' | grep -qx true || die "could not resolve thread $3"
+    ;;
+
   write)
     [ $# -eq 4 ] || die "usage: state.sh write <pr> <summary.md> <state.json>"
     jq -e '.version and (.round | type == "number") and .last_reviewed_sha and (.findings | type == "array")' \
@@ -101,5 +118,5 @@ case "$CMD" in
     fi
     ;;
 
-  *) die "unknown command: $CMD (read | threads | review | write)" ;;
+  *) die "unknown command: $CMD (read | threads | review | reply | resolve | write)" ;;
 esac
