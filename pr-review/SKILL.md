@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Review a GitHub pull request in rounds that converge — one deep, verified review first, then later rounds check only the fixes and the new commits, with the review's memory (findings and their status) kept in one comment on the PR. Use when the user says "review PR 42", "do a PR review on 42", "do a pr on X", "review this pull request", "re-review the PR", "check if my review comments were addressed", "review and fix PR 42", "/pr-review", or passes a PR number or URL to review. It posts without asking: the finished product is the inline comments and the round summary on the PR.
+description: Review a GitHub pull request in rounds that converge — one deep, verified review first, then later rounds check only the fixes and the new commits, with the review's memory (findings and their status) kept in one comment on the PR. Use when the user says "review PR 42", "do a PR review on 42", "do a pr on X", "review this pull request", "re-review the PR", "check if my review comments were addressed", "review and fix PR 42", "/pr-review", or passes a PR number or URL to review. It posts without asking; the finished product is the inline comments and the round summary on the PR.
 ---
 
 # PR Review
