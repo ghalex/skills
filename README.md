@@ -42,6 +42,7 @@ npx skills add ghalex/skills -g
 | [`prd-to-issues`](#prd-to-issues) | Break a PRD or plan into vertically-sliced issues for a ralph loop |
 | [`vm-security`](#vm-security) | Audit and harden a Linux VM over SSH, and check it for signs of compromise |
 | [`pr-review`](#pr-review) | Review a GitHub PR in rounds that converge, with the review's memory kept on the PR |
+| [`drawio`](#drawio) | Draw and edit draw.io diagrams as plain XML in one consistent boxes-and-arrows style |
 
 ---
 
@@ -349,6 +350,23 @@ npx skills add ghalex/skills --skill pr-review
 /pr-review 42 --dry-run
 /pr-review 42 --fix
 claude "re-review PR 42, check my fixes"
+```
+
+---
+
+## `drawio`
+
+Draws and edits [draw.io](https://www.drawio.com) diagrams as plain `.drawio` XML: machines as boxes, one colour per component, labelled orthogonal arrows. It reads the code for the facts first, validates the file against draw.io's generation checklist, and ships two example diagrams to copy from.
+
+**Install:**
+```bash
+npx skills add ghalex/skills --skill drawio
+```
+
+**Usage:**
+```bash
+claude "draw an architecture diagram of this project in docs/architecture.drawio"
+claude "draw how a request gets from the browser to the database"
 ```
 
 ---

@@ -1,0 +1,76 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="shop-login-path">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="shop-title" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontSize=16;" value="&lt;b&gt;login → database&lt;/b&gt; (the path of one request)" vertex="1">
+          <mxGeometry height="30" width="480" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-dns" parent="1" style="whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;DNS of shop.example.com&lt;/b&gt;&lt;div&gt;A @ → APP server IP&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="200" x="40" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-visitor" parent="1" style="whiteSpace=wrap;html=1;" value="&lt;b&gt;Visitor&lt;/b&gt;&lt;div&gt;browser&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="60" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-visitorUrl" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="https://shop.example.com/login" vertex="1">
+          <mxGeometry height="30" width="200" x="40" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-appM" parent="1" style="whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="370" width="490" x="380" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-appLbl" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;APP server&lt;/b&gt; (public IP)" vertex="1">
+          <mxGeometry height="30" width="290" x="480" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-nginx" parent="1" style="whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Nginx&lt;/b&gt;&lt;div&gt;:443&lt;/div&gt;&lt;div&gt;ends TLS&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="170" x="400" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-api" parent="1" style="whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;api&lt;/b&gt;&lt;div&gt;:8000&lt;/div&gt;&lt;div&gt;checks the password&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="170" x="680" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-frontend" parent="1" style="whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;frontend&lt;/b&gt;&lt;div&gt;React build, static files&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="170" x="400" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-appOs" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="LINUX" vertex="1">
+          <mxGeometry height="30" width="450" x="400" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-dbM" parent="1" style="whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="370" width="280" x="1100" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-dbLbl" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;DB server&lt;/b&gt; (private network)" vertex="1">
+          <mxGeometry height="30" width="280" x="1100" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-pg" parent="1" style="whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;Postgres&lt;/b&gt;&lt;div&gt;users&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="240" x="1120" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-redis" parent="1" style="whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Redis&lt;/b&gt;&lt;div&gt;sessions&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="240" x="1120" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-dbOs" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="LINUX" vertex="1">
+          <mxGeometry height="30" width="240" x="1120" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-e1" edge="1" parent="1" source="shop-visitor" target="shop-dns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" value="1. where is shop.example.com?">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-e2" edge="1" parent="1" source="shop-visitor" target="shop-nginx" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;verticalAlign=bottom;" value="2. HTTPS :443&lt;br&gt;POST /api/login">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-e3" edge="1" parent="1" source="shop-nginx" target="shop-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;verticalAlign=bottom;" value="3. HTTP :8000">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-e4" edge="1" parent="1" source="shop-api" target="shop-pg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;verticalAlign=bottom;" value="4. SQL :5432&lt;br&gt;find the user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-e5" edge="1" parent="1" source="shop-api" target="shop-redis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="5. :6379&lt;br&gt;store the session">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-d1" edge="1" parent="1" source="shop-nginx" target="shop-frontend" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;dashed=1;" value="the page itself:&lt;br&gt;GET / → static files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="shop-note" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="The answer goes back the same way with a session cookie." vertex="1">
+          <mxGeometry height="40" width="280" x="1100" y="650" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
