@@ -14,7 +14,7 @@ didn't break anything.**
 ```
 round 1   full diff → reviewers in parallel → verify each major → post
 round 2+  read memory → status of old findings → review only new commits → verify → post
---fix     after posting: fix each open finding → tests → one commit each → push → next round
+--fix     after posting: fix each open finding → tests → one commit each → push → update threads + summary. No new round.
 stop      no open major and the last round found no new major → ready for a human to merge
 ```
 
@@ -31,7 +31,8 @@ Each finding is also an inline comment, so the author answers it where it is.
   prepared files stay in the scratchpad; when the user then says "post" (or
   "post all but F3"), post those files as they are, without reviewing again.
 - `--fix`: after posting, fix the open findings on the PR branch, one commit
-  each, push, and run the next round to confirm (see **--fix**). With ids,
+  each, push, and update the threads and the summary (see **--fix**). It never
+  starts another review round. With ids,
   fix only those. Not with `--dry-run`.
 
 Run it start to finish without asking anything. The finished product is the
@@ -194,9 +195,15 @@ State (`state.json`, full list every time, never drop a finding):
 `status` is one of `open`, `fixed`, `wontfix`, `disputed`. Match old findings
 to code by `file` + `claim`, not by line; lines move.
 
-### --fix: fix, commit, push, confirm
+### --fix: fix, commit, push, update the comment
 
 Only after the round is posted, so every finding has its id and its thread.
+The same steps apply when the user says "fix them" (or "fix F3") after a run,
+with or without the flag.
+
+**One round per invocation.** Fixing never triggers a review of the fixes:
+no reviewer or verifier agents run after the push. The next round happens only
+when the user runs the skill again.
 
 1. **Where.** The fixes go on the PR's head branch. The checkout (or the
    scratchpad worktree) must be at `headRefOid` with a clean tree; with
@@ -220,14 +227,16 @@ Only after the round is posted, so every finding has its id and its thread.
    `fix(<scope>): <claim in a few words> (F3)`, body: the failure scenario in
    one line and what changed. Two findings fixed by one change share a commit
    that names both ids. Never amend, never force-push.
-6. **Push** to the head branch, then run **Round 2+** as usual: it marks the
-   fixed findings `fixed`, reviews the delta, and posts. For each finding it
-   confirmed fixed, reply `fixed in <short sha>` in its thread
-   (`$S reply N <comment_id> body.md`) and resolve the thread
-   (`$S resolve N <thread_id>`); ids come from `$S threads N`.
-7. **Loop.** If the confirming round found new majors, fix those the same way.
-   The round cap applies: the fix loop ends with the rounds, and whatever is
-   still open is reported, not fixed.
+6. **Push** to the head branch, once, after the last fix.
+7. **Update the PR, then stop.** For each finding you fixed, reply
+   `fixed in <short sha>` in its thread (`$S reply N <comment_id> body.md`) and
+   resolve it (`$S resolve N <thread_id>`); ids come from `$S threads N`. For a
+   skipped finding, reply with why and leave the thread open. Set the fixed
+   ones to `fixed` in the state and rewrite the summary with
+   `$S write N summary.md state.json`: same round number, `last_reviewed_sha`
+   unchanged (the fixes were not reviewed), and one line saying the fix commits
+   are unreviewed and which tests passed. Do not review the delta. Do not start
+   a round.
 
 The recap lists each commit with its finding, the findings skipped and why,
 and the push result.
@@ -251,4 +260,6 @@ and the push result.
   they look first.
 - With `--fix`: never commit on a dirty tree, never commit with the tests red,
   never amend or force-push, and never touch a finding that isn't `open`.
+- One invocation, one round. Never start a second review round on your own:
+  not after fixing, not "to confirm". Only a new `/pr-review` run reviews again.
 - Only the summary comment written by the current `gh` user is read as state.

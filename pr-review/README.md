@@ -39,11 +39,11 @@ summary comment on the PR.
    Settled findings are never raised again.
 5. **It has a stop rule.** "Ready" means no open major and no new major this
    round. After 3 rounds it hands over to a human. It never approves on GitHub.
-6. **`--fix` closes the loop.** After posting, it fixes each open finding on
-   the PR branch, one commit per finding on a green test suite, pushes, and
-   runs the next round to confirm. Confirmed fixes get a `fixed in <sha>`
-   reply and their thread resolved. It never force-pushes or commits on a
-   dirty tree.
+6. **`--fix` fixes, pushes, updates the comment.** After posting, it fixes each
+   open finding on the PR branch, one commit per finding on a green test suite,
+   pushes once, replies `fixed in <sha>` and resolves each fixed thread, and
+   updates the summary. It never starts another review round: one invocation,
+   one round. It never force-pushes or commits on a dirty tree.
 
 Authors resolve a thread when it's fixed, or reply `wontfix: <reason>` /
 `disagree: <reason>`.
